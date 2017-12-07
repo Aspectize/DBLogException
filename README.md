@@ -5,7 +5,7 @@ Aspectize Extension to automatically log exceptions
 
 Download extension package from aspectize.com:
 - in the portal, goto extension section
-- browse extension, and find BootstrapSwitch
+- browse extension, and find DBLogException
 - download package and unzip it into your local WebHost Applications directory; you should have a DBLogException directory next to your app directory.
 
 # 2 - Configuration
