@@ -39,4 +39,4 @@ FileServiceName; name of file Service to store Exception Information, in case Ex
 MailServiceName: name of your SMTPService to send an email
 MailTo: recipients email adresses, separated by comma.
 
-Each time an exception occured, the exception is logged into your DataBase (in a table LogException), and an email is sent to recipients; log report stack and error message.
+Each time an exception occured, the exception is logged into your DataBase (in a table LogException), and an email is sent to recipients with Exception info, including user, call stack and error message.
