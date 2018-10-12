@@ -42,7 +42,7 @@ namespace DBLogException
                     logException.Message = (messageTooLong) ? "" : traceInfo.Message;
                     logException.ServiceName = traceInfo.ServiceName;
                     logException.DateException = traceInfo.Received;
-                    logException.UserAgent = (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.Request != null) ? System.Web.HttpContext.Current.Request.UserAgent : "";
+                    logException.UserAgent = (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.Request != null && (!string.IsNullOrEmpty(System.Web.HttpContext.Current.Request.UserAgent))) ? System.Web.HttpContext.Current.Request.UserAgent : "";
 
                     AspectizeUser aspectizeUser = ExecutingContext.CurrentUser;
 
