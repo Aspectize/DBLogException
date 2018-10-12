@@ -5,7 +5,7 @@ Aspectize Extension to automatically log exceptions
 
 Download extension package from aspectize.com:
 - in the portal, goto extension section
-- browse extension, and find BootstrapSwitch
+- browse extension, and find DBLogException
 - download package and unzip it into your local WebHost Applications directory; you should have a DBLogException directory next to your app directory.
 
 # 2 - Configuration
@@ -39,4 +39,4 @@ FileServiceName; name of file Service to store Exception Information, in case Ex
 MailServiceName: name of your SMTPService to send an email
 MailTo: recipients email adresses, separated by comma.
 
-Each time an exception occured, the exception is logged into your DataBase (in a table LogException), and an email is sent to recipients
+Each time an exception occured, the exception is logged into your DataBase (in a table LogException), and an email is sent to recipients with Exception info, including user, call stack and error message.
