@@ -5,8 +5,7 @@ using System.Data;
 using Aspectize.Core;
 using System.IO;
 
-namespace DBLogException
-{
+namespace DBLogException {
     [Service(Name = "DBLogException", ConfigurationRequired = true)]
     public class DBLogException : ILog //, IInitializable, ISingleton
     {
@@ -22,17 +21,22 @@ namespace DBLogException
         [Parameter(Optional = true)]
         string MailTo = "";
 
-        void ILog.WriteLog(TraceInfo traceInfo)
-        {
-            if (traceInfo.Level < 0)
-            {
-                IDataManager dm = EntityManager.FromDataBaseService(DataServiceName);
-
-                IEntityManager em = dm as IEntityManager;
-
-                if (!ExecutingContext.CurrentHostUrl.ToLower().StartsWith(@"http://localhost"))
-                {
+        void ILog.WriteLog(TraceInfo traceInfo) {
+            if (traceInfo.Level < 0) {
+                if (!ExecutingContext.CurrentHostUrl.ToLower().StartsWith(@"http://localhost")) {
                     bool messageTooLong = traceInfo.Message.Length > 32000;
+
+                    IDataManager dm = null;
+
+                    IEntityManager em = null;
+
+                    if (!string.IsNullOrEmpty(DataServiceName)) {
+                        dm = EntityManager.FromDataBaseService(DataServiceName);
+
+                        em = dm as IEntityManager;
+                    } else {
+                        em = EntityManager.FromDataSet(DataSetHelper.Create());
+                    }
 
                     LogException logException = em.CreateInstance<LogException>();
 
@@ -46,17 +50,13 @@ namespace DBLogException
 
                     AspectizeUser aspectizeUser = ExecutingContext.CurrentUser;
 
-                    if (aspectizeUser.IsAuthenticated && aspectizeUser["Email"] != null)
-                    {
+                    if (aspectizeUser.IsAuthenticated && aspectizeUser["Email"] != null) {
                         logException.UserName = aspectizeUser["Email"].ToString();
-                    }
-                    else
-                    {
+                    } else {
                         logException.UserName = "Unknow user";
                     }
 
-                    if (messageTooLong && !string.IsNullOrEmpty(FileServiceName))
-                    {
+                    if (messageTooLong && !string.IsNullOrEmpty(FileServiceName)) {
                         IFileService fs = ExecutingContext.GetService<IFileService>(FileServiceName);
 
                         Guid fileId = Guid.NewGuid();
@@ -74,10 +74,11 @@ namespace DBLogException
                         fs.Write(fileName, stream);
                     }
 
-                    dm.SaveTransactional();
+                    if (!string.IsNullOrEmpty(DataServiceName)) {
+                        dm.SaveTransactional();
+                    }
 
-                    if (!string.IsNullOrEmpty(MailTo) && !string.IsNullOrEmpty(MailServiceName))
-                    {
+                    if (!string.IsNullOrEmpty(MailTo) && !string.IsNullOrEmpty(MailServiceName)) {
                         IAspectizeSMTPService smtpService = ExecutingContext.GetService<IAspectizeSMTPService>(MailServiceName);
 
                         string subject = string.Format("Bug : {0} {1}", traceInfo.ApplicationName, logException.UserName);
@@ -94,8 +95,7 @@ namespace DBLogException
                         sb.AppendFormat("Host: {0}", ExecutingContext.CurrentHostUrl);
                         sb.AppendLine("<br />");
                         sb.AppendLine();
-                        if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.Request != null)
-                        {
+                        if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.Request != null) {
                             sb.AppendFormat("Url: {0}", System.Web.HttpContext.Current.Request.Url.AbsoluteUri);
                             sb.AppendLine("<br />");
                             sb.AppendLine();
