@@ -109,7 +109,7 @@ namespace DBLogException {
                         sb.AppendFormat("Command: {0}", traceInfo.CommandName);
                         sb.AppendLine("<br />");
                         sb.AppendLine();
-                        sb.AppendFormat("Message: {0}", traceInfo.Message.Replace("\r\n", "<br />"));
+                        sb.AppendFormat("Message: {0}", (messageTooLong) ? logException.Message : traceInfo.Message.Replace("\r\n", "<br />"));
                         sb.AppendLine("<br />");
 
                         string emailContent = sb.ToString();
