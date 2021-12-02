@@ -113,8 +113,11 @@ namespace DBLogException {
                         sb.AppendLine("<br />");
 
                         string emailContent = sb.ToString();
+                        try {
+                            smtpService.SendMail(false, MailTo.Split(','), subject, emailContent, null);
+                        } catch (Exception x) {
 
-                        smtpService.SendMail(false, MailTo.Split(','), subject, emailContent, null);
+                        }
                     }
                 }
             }
