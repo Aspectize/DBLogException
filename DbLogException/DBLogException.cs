@@ -43,7 +43,7 @@ namespace DBLogException {
                     logException.ApplicationName = traceInfo.ApplicationName;
                     logException.CommandName = traceInfo.CommandName;
                     logException.InfoTypeName = traceInfo.InfoTypeName;
-                    logException.Message = (messageTooLong) ? "" : traceInfo.Message;
+                    logException.Message = (messageTooLong) ? traceInfo.Message.Substring(0, 30000) : traceInfo.Message;
                     logException.ServiceName = traceInfo.ServiceName;
                     logException.DateException = traceInfo.Received;
                     logException.UserAgent = (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.Request != null && (!string.IsNullOrEmpty(System.Web.HttpContext.Current.Request.UserAgent))) ? System.Web.HttpContext.Current.Request.UserAgent : "";
@@ -56,14 +56,13 @@ namespace DBLogException {
                         logException.UserName = "Unknow user";
                     }
 
+                    byte[] messageFile = null;
                     if (messageTooLong && !string.IsNullOrEmpty(FileServiceName)) {
                         IFileService fs = ExecutingContext.GetService<IFileService>(FileServiceName);
 
                         Guid fileId = Guid.NewGuid();
 
                         string fileName = string.Format("Trace/{0}.txt", fileId);
-
-                        logException.Message = string.Format("Message Exception is too long to be saved in entity, and is saved in file {0}", fileName);
 
                         MemoryStream stream = new MemoryStream();
                         StreamWriter writer = new StreamWriter(stream);
@@ -72,6 +71,8 @@ namespace DBLogException {
                         stream.Position = 0;
 
                         fs.Write(fileName, stream);
+
+                        messageFile = stream.ToArray();
                     }
 
                     if (!string.IsNullOrEmpty(DataServiceName)) {
@@ -85,6 +86,7 @@ namespace DBLogException {
 
                         StringBuilder sb = new StringBuilder();
 
+                        sb.AppendLine("<pre style='white-space: pre-wrap; background: none; border: none;'>");
                         sb.AppendLine();
                         sb.AppendFormat("Date: {0}", traceInfo.Received);
                         sb.AppendLine("<br />");
@@ -109,12 +111,20 @@ namespace DBLogException {
                         sb.AppendFormat("Command: {0}", traceInfo.CommandName);
                         sb.AppendLine("<br />");
                         sb.AppendLine();
-                        sb.AppendFormat("Message: {0}", (messageTooLong) ? logException.Message : traceInfo.Message.Replace("\r\n", "<br />"));
+                        //sb.AppendFormat("Message: {0}", traceInfo.Message.Replace("\r\n", "<br />"));
+                        sb.AppendFormat("Message: {0}", traceInfo.Message.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;"));
                         sb.AppendLine("<br />");
+                        sb.AppendLine("</pre>");
 
                         string emailContent = sb.ToString();
                         try {
-                            smtpService.SendMail(false, MailTo.Split(','), subject, emailContent, null);
+                            var dicoAttachements = new Dictionary<string, byte[]>();
+
+                            if (messageFile != null) {
+                                dicoAttachements.Add("LogException.txt", messageFile);
+                            }
+
+                            smtpService.SendMail(false, MailTo.Split(','), subject, emailContent, dicoAttachements);
                         } catch (Exception x) {
 
                         }
