@@ -56,7 +56,7 @@ namespace DBLogException {
                         logException.UserName = "Unknow user";
                     }
 
-                    byte[] messageFile = null;
+                    byte[] messageFile = Encoding.UTF8.GetBytes(traceInfo.Message);
                     if (messageTooLong && !string.IsNullOrEmpty(FileServiceName)) {
                         IFileService fs = ExecutingContext.GetService<IFileService>(FileServiceName);
 
@@ -86,7 +86,7 @@ namespace DBLogException {
 
                         StringBuilder sb = new StringBuilder();
 
-                        sb.AppendLine("<pre style='white-space: pre-wrap; background: none; border: none;'>");
+                        //sb.AppendLine("<pre style='white-space: pre-wrap; background: none; border: none;'>");
                         sb.AppendLine();
                         sb.AppendFormat("Date: {0}", traceInfo.Received);
                         sb.AppendLine("<br />");
@@ -111,10 +111,10 @@ namespace DBLogException {
                         sb.AppendFormat("Command: {0}", traceInfo.CommandName);
                         sb.AppendLine("<br />");
                         sb.AppendLine();
-                        //sb.AppendFormat("Message: {0}", traceInfo.Message.Replace("\r\n", "<br />"));
-                        sb.AppendFormat("Message: {0}", traceInfo.Message.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;"));
+                        sb.AppendFormat("Message: {0}", traceInfo.Message.Replace("\r\n", "<br />"));
+                        //sb.AppendFormat("Message: {0}", traceInfo.Message.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;"));
                         sb.AppendLine("<br />");
-                        sb.AppendLine("</pre>");
+                        //sb.AppendLine("</pre>");
 
                         string emailContent = sb.ToString();
                         try {
